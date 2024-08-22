@@ -14,16 +14,10 @@ const useTodos = () => {
           .get<Todo[]>("https://jsonplaceholder.typicode.com/todos")
           .then((res) => res.data);
     
-      const {
-        data,
-        error,
-        isLoading,
-      } = useQuery<Todo[], Error>({
+    return useQuery<Todo[], Error>({
         queryKey: ["todos"],
         queryFn: fetchTodos,
       });
-    
-    return {data, error,isLoading}
 }
 
 export default useTodos
