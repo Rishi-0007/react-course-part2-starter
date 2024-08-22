@@ -1,5 +1,3 @@
-import { useQuery } from "@tanstack/react-query";
-import axios from "axios";
 import useTodos from "../hooks/useTodos";
 
 const TodoList = () => {
