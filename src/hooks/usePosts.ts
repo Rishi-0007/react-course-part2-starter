@@ -1,4 +1,3 @@
-// import { useInfiniteQuery } from '';
 import { useInfiniteQuery } from "@tanstack/react-query";
 import axios from "axios";
 
@@ -11,10 +10,6 @@ interface Post {
 
 interface PostQuery {
   pageSize: number;
-}
-
-interface pageParam {
-  pageParam: number;
 }
 
 const usePosts = (query: PostQuery) => {
