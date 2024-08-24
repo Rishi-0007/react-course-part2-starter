@@ -22,6 +22,8 @@ const TodoForm = () => {
         savedTodo,
         ...(todos || []),
       ]);
+
+      if (ref.current) ref.current.value = "";
     },
   });
 
@@ -34,7 +36,7 @@ const TodoForm = () => {
         className="row mb-3"
         onSubmit={(e) => {
           e.preventDefault();
-          if (ref.current)
+          if (ref.current?.value)
             addTodo.mutate({
               id: 0,
               title: ref.current?.value,
@@ -47,8 +49,12 @@ const TodoForm = () => {
           <input ref={ref} type="text" className="form-control" />
         </div>
         <div className="col">
-          <button className="btn btn-primary" type="submit">
-            Add
+          <button
+            className="btn btn-primary"
+            type="submit"
+            disabled={addTodo.isPending}
+          >
+            {addTodo.isPending ? "Adding.." : "Add"}
           </button>
         </div>
       </form>
