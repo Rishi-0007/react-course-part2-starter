@@ -3,27 +3,43 @@ import { useRef } from "react";
 import { Todo } from "../hooks/useTodos";
 import axios from "axios";
 
-const TodoForm = () => {
-  const queryClient = useQueryClient();
-  const ref = useRef<HTMLInputElement>(null);
+interface AddTodoContext {
+  previousTodos: Todo[];
+}
 
-  const addTodo = useMutation({
+const TodoForm = () => {
+  const ref = useRef<HTMLInputElement>(null);
+  const queryClient = useQueryClient();
+
+  const addTodo = useMutation<Todo, Error, Todo, AddTodoContext>({
     mutationFn: (todo: Todo) =>
       axios
         .post<Todo>("https://jsonplaceholder.typicode.com/todos ", todo)
         .then((res) => res.data),
-    onSuccess: (savedTodo, newTodo) => {
-      //best approach to tell react query to refetch data (but this approach will not work here as jsonplaceholder not really updates the data in backend so whenever we fetch we will get same old data)
-      // queryClient.invalidateQueries({
-      //   queryKey: ["todos"],
-      // });
-      //updating cache directly
+    // changes ui before server fetches data
+    onMutate: (newTodo: Todo) => {
+      // return context object which stores previos query, to handle in case of error
+      const previousTodos = queryClient.getQueryData<Todo[]>(["todos"]) || [];
+
       queryClient.setQueryData<Todo[]>(["todos"], (todos) => [
-        savedTodo,
+        newTodo,
         ...(todos || []),
       ]);
 
       if (ref.current) ref.current.value = "";
+
+      return { previousTodos };
+    },
+
+    onSuccess: (savedTodo, newTodo) => {
+      queryClient.setQueryData<Todo[]>(["todos"], (todos) =>
+        todos?.map((todo) => (todo === newTodo ? savedTodo : todo))
+      );
+    },
+
+    onError: (error, newTodo, context) => {
+      if (!context) return;
+      queryClient.setQueryData<Todo[]>(["todos"], context.previousTodos);
     },
   });
 
